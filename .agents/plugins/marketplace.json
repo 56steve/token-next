@@ -1,14 +1,14 @@
 {
-  "name": "token-bar",
+  "name": "token-next",
   "interface": {
-    "displayName": "token-bar"
+    "displayName": "token-next"
   },
   "plugins": [
     {
-      "name": "token-bar",
+      "name": "token-next",
       "source": {
         "source": "local",
-        "path": "./plugins/token-bar-codex"
+        "path": "./plugins/token-next-codex"
       },
       "policy": {
         "installation": "AVAILABLE",

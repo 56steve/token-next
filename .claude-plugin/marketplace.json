@@ -1,5 +1,5 @@
 {
-  "name": "token-bar",
+  "name": "token-next",
   "owner": {
     "name": "Steve",
     "email": "stevejason639@gmail.com"
@@ -9,8 +9,8 @@
   },
   "plugins": [
     {
-      "name": "token-bar",
-      "source": "./plugins/token-bar",
+      "name": "token-next",
+      "source": "./plugins/token-next",
       "description": "Shows your Claude 5-hour and weekly usage against your limits, and when the next whole percent lands."
     }
   ]

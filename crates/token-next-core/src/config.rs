@@ -1,0 +1,154 @@
+use std::fs;
+use std::io;
+use std::path::{Path, PathBuf};
+
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+
+/// User settings. Each limit is an estimate the user calibrates, because Anthropic does not publish it.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Config {
+    /// Limit for the rolling window of `window_hours`, such as the 5-hour limit.
+    pub limit_tokens: Option<u64>,
+    pub window_hours: f64,
+    /// Limit for the weekly window.
+    pub weekly_limit_tokens: Option<u64>,
+    /// A time the 5-hour window resets, from the user's settings. Windows are counted from resets.
+    pub five_hour_reset: Option<DateTime<Utc>>,
+    /// A time the weekly window resets.
+    pub weekly_reset: Option<DateTime<Utc>>,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            limit_tokens: None,
+            window_hours: 5.0,
+            weekly_limit_tokens: None,
+            five_hour_reset: None,
+            weekly_reset: None,
+        }
+    }
+}
+
+/// Returns the default config when the file is missing or unreadable.
+pub fn load_config(path: &Path) -> Config {
+    fs::read_to_string(path)
+        .ok()
+        .and_then(|text| serde_json::from_str(&text).ok())
+        .unwrap_or_default()
+}
+
+pub fn save_config(path: &Path, config: &Config) -> io::Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let text = serde_json::to_string_pretty(config)?;
+    fs::write(path, text)
+}
+
+/// The folder token-next keeps its files in, under `base` (the user's config folder).
+///
+/// Someone who used it when it was called token-bar keeps their existing folder, so their saved
+/// settings and readings are still found. New users get `token-next`.
+pub fn data_dir_in(base: &std::path::Path) -> PathBuf {
+    let current = base.join("token-next");
+    let legacy = base.join("token-bar");
+    if legacy.exists() && !current.exists() {
+        legacy
+    } else {
+        current
+    }
+}
+
+/// `<config dir>/token-next/config.json`, such as `~/Library/Application Support` on macOS.
+pub fn default_config_path() -> Option<PathBuf> {
+    dirs::config_dir().map(|dir| data_dir_in(&dir).join("config.json"))
+}
+
+/// `~/.claude/projects`, where Claude Code writes its session logs.
+pub fn default_logs_root() -> Option<PathBuf> {
+    dirs::home_dir().map(|home| home.join(".claude").join("projects"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp_file(name: &str) -> PathBuf {
+        let dir =
+            std::env::temp_dir().join(format!("token-next-config-{name}-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        dir.join("config.json")
+    }
+
+    fn fresh_base(name: &str) -> PathBuf {
+        let base =
+            std::env::temp_dir().join(format!("token-next-base-{name}-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&base);
+        fs::create_dir_all(&base).expect("create base");
+        base
+    }
+
+    #[test]
+    fn a_new_user_gets_the_token_next_folder() {
+        let base = fresh_base("new");
+
+        assert_eq!(data_dir_in(&base), base.join("token-next"));
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn someone_with_the_old_token_bar_folder_keeps_using_it() {
+        let base = fresh_base("legacy");
+        fs::create_dir_all(base.join("token-bar")).expect("create old folder");
+
+        assert_eq!(data_dir_in(&base), base.join("token-bar"));
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn the_new_folder_wins_when_both_exist() {
+        let base = fresh_base("both");
+        fs::create_dir_all(base.join("token-bar")).expect("create old folder");
+        fs::create_dir_all(base.join("token-next")).expect("create new folder");
+
+        assert_eq!(data_dir_in(&base), base.join("token-next"));
+        let _ = fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn missing_file_gives_defaults() {
+        let path = temp_file("missing");
+
+        assert_eq!(load_config(&path), Config::default());
+    }
+
+    #[test]
+    fn saved_limit_round_trips() {
+        let path = temp_file("roundtrip");
+        let config = Config {
+            limit_tokens: Some(5_000_000),
+            window_hours: 5.0,
+            weekly_limit_tokens: Some(40_000_000),
+            five_hour_reset: Some("2026-10-29T14:20:00Z".parse().expect("valid time")),
+            weekly_reset: None,
+        };
+
+        save_config(&path, &config).expect("save config");
+
+        assert_eq!(load_config(&path), config);
+        let _ = fs::remove_dir_all(path.parent().expect("has parent"));
+    }
+
+    #[test]
+    fn corrupt_file_gives_defaults() {
+        let path = temp_file("corrupt");
+        fs::create_dir_all(path.parent().expect("has parent")).expect("create dir");
+        fs::write(&path, "{ not json").expect("write");
+
+        assert_eq!(load_config(&path), Config::default());
+        let _ = fs::remove_dir_all(path.parent().expect("has parent"));
+    }
+}

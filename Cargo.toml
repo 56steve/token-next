@@ -1,10 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["crates/token-bar-core", "crates/token-bar-cli"]
+members = ["crates/token-next-core", "crates/token-next-cli"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/56steve/Token-Bar"
+repository = "https://github.com/56steve/token-next"
 rust-version = "1.75"

@@ -1,0 +1,17 @@
+[package]
+name = "token-next"
+description = "Shows how close you are to your Claude usage limit, and when the next whole percent lands."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "token-next"
+path = "src/main.rs"
+
+[dependencies]
+token-next-core = { path = "../token-next-core" }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+serde_json = "1"
