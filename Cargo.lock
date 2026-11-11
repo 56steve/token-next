@@ -347,16 +347,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "token-bar"
+name = "token-next"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "serde_json",
- "token-bar-core",
+ "token-next-core",
 ]
 
 [[package]]
-name = "token-bar-core"
+name = "token-next-core"
 version = "0.1.0"
 dependencies = [
  "chrono",

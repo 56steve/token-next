@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in token-bar is wrong, confusing, or broken
+description: Something in token-next is wrong, confusing, or broken
 labels: [bug]
 body:
   - type: markdown
@@ -34,7 +34,7 @@ body:
     id: where
     attributes:
       label: Where do you use it?
-      description: Live numbers only come from a terminal, so this changes what token-bar can do.
+      description: Live numbers only come from a terminal, so this changes what token-next can do.
       options:
         - Terminal
         - Claude desktop app
@@ -54,11 +54,11 @@ body:
   - type: input
     id: version
     attributes:
-      label: token-bar version
+      label: token-next version
       description: Shown by `claude plugin list`, for example 0.3.0.
   - type: textarea
     id: output
     attributes:
       label: Output
-      description: The output of `/token-bar:token all` (or the Codex answer), with anything private removed.
+      description: The output of `/token-next:token all` (or the Codex answer), with anything private removed.
       render: text

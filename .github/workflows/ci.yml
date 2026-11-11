@@ -31,10 +31,10 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Claude Code plugin tests
-        working-directory: plugins/token-bar
+        working-directory: plugins/token-next
         run: python -m unittest discover -s tests
       - name: Codex plugin tests
-        working-directory: plugins/token-bar-codex
+        working-directory: plugins/token-next-codex
         run: python -m unittest discover -s tests
 
   lint:

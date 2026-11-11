@@ -1,14 +1,14 @@
-# Contributing to token-bar
+# Contributing to token-next
 
-Thanks for helping. token-bar answers one question inside your coding agent: how close am I to my usage limit? Bug reports, ideas, docs fixes, and support for more tools are all welcome.
+Thanks for helping. token-next answers one question inside your coding agent: how close am I to my usage limit? Bug reports, ideas, docs fixes, and support for more tools are all welcome.
 
 ## The one rule
 
-**token-bar never sends anything out.** It reads files the tools already keep on your machine and writes only its own small settings files. No network calls, no accounts, no analytics. A change that adds any of that won't be merged, even as an option. If you find that token-bar does send data somewhere, that is a bug: please open an issue.
+**token-next never sends anything out.** It reads files the tools already keep on your machine and writes only its own small settings files. No network calls, no accounts, no analytics. A change that adds any of that won't be merged, even as an option. If you find that token-next does send data somewhere, that is a bug: please open an issue.
 
 ## Ways to help
 
-- **Report a bug.** Open an issue (the form asks for the details below) with what you ran, what you expected, and what you got. Useful details: your tool and version, whether you use a terminal or the desktop app, your plan (Pro, Max, Ultra, API key), and the output of `python3 plugins/token-bar/scripts/token_bar.py status` with anything private removed.
+- **Report a bug.** Open an issue (the form asks for the details below) with what you ran, what you expected, and what you got. Useful details: your tool and version, whether you use a terminal or the desktop app, your plan (Pro, Max, Ultra, API key), and the output of `python3 plugins/token-next/scripts/token_next.py status` with anything private removed.
 - **Suggest an idea.** Say what you were trying to find out, not only the feature you want. "I want to know if I'll last until Friday" is easier to design for than "add a flag".
 - **Add a tool.** The most wanted contribution. See [Adding a tool](#adding-a-tool) below.
 - **Improve the docs.** If something confused you, it will confuse others.
@@ -17,9 +17,9 @@ Thanks for helping. token-bar answers one question inside your coding agent: how
 
 | Path | What it is |
 | :- | :- |
-| `plugins/token-bar/` | The Claude Code plugin: `scripts/token_bar.py` does the work, `skills/token/SKILL.md` tells Claude how to run it, `hooks/` holds the heads-up hook, `tests/` holds its tests |
-| `plugins/token-bar-codex/` | The Codex plugin: `skills/token-bar/scripts/codex_usage.py` reads Codex's session logs |
-| `crates/` | A Rust command-line tool for the Claude numbers (`token-bar-core` and `token-bar-cli`) |
+| `plugins/token-next/` | The Claude Code plugin: `scripts/token_next.py` does the work, `skills/token/SKILL.md` tells Claude how to run it, `hooks/` holds the heads-up hook, `tests/` holds its tests |
+| `plugins/token-next-codex/` | The Codex plugin: `skills/token-next/scripts/codex_usage.py` reads Codex's session logs |
+| `crates/` | A Rust command-line tool for the Claude numbers (`token-next-core` and `token-next-cli`) |
 | `.claude-plugin/`, `.agents/plugins/` | The marketplace files Claude Code and Codex read when you add this repo |
 | `assets/` | Screenshots used in the README |
 
@@ -30,15 +30,15 @@ The scripts use the Python standard library only, so people can install the plug
 You need Python 3. You only need Rust if you work on the command-line tool.
 
 ```bash
-git clone https://github.com/56steve/Token-Bar.git
-cd Token-Bar
+git clone https://github.com/56steve/token-next.git
+cd token-next
 ```
 
 Run the tests before and after your change:
 
 ```bash
-cd plugins/token-bar && python3 -m unittest discover -s tests
-cd plugins/token-bar-codex && python3 -m unittest discover -s tests
+cd plugins/token-next && python3 -m unittest discover -s tests
+cd plugins/token-next-codex && python3 -m unittest discover -s tests
 ```
 
 If you touch the Rust code:
@@ -55,17 +55,17 @@ We keep the Python lint-clean with [ruff](https://docs.astral.sh/ruff/): `ruff c
 Running the script directly tests the script, but not the skill that Claude follows. To check the whole flow, load your working copy as the plugin:
 
 ```bash
-claude --plugin-dir plugins/token-bar
+claude --plugin-dir plugins/token-next
 ```
 
 or add the repo folder as a marketplace and install from it:
 
 ```bash
-claude plugin marketplace add /path/to/Token-Bar
-claude plugin install token-bar@token-bar --scope user
+claude plugin marketplace add /path/to/token-next
+claude plugin install token-next@token-next --scope user
 ```
 
-A marketplace named `token-bar` replaces one you already added with that name. To go back to the published version, remove it and add `56steve/Token-Bar` again. Restart Claude Code after either method, because it loads skills when a session starts.
+A marketplace named `token-next` replaces one you already added with that name. To go back to the published version, remove it and add `56steve/token-next` again. Restart Claude Code after either method, because it loads skills when a session starts.
 
 ## Making a change
 
@@ -86,11 +86,11 @@ A marketplace named `token-bar` replaces one you already added with that name. T
 
 ## Adding a tool
 
-Each tool is one small reader that finds the tool's own usage records and prints them. The Codex reader at `plugins/token-bar-codex/skills/token-bar/scripts/codex_usage.py` is the shortest example to copy.
+Each tool is one small reader that finds the tool's own usage records and prints them. The Codex reader at `plugins/token-next-codex/skills/token-next/scripts/codex_usage.py` is the shortest example to copy.
 
 A reader should:
 
-1. Find the tool's usage records on disk, and do nothing else with them. No network, no writing outside token-bar's own settings.
+1. Find the tool's usage records on disk, and do nothing else with them. No network, no writing outside token-next's own settings.
 2. Work out, for each limit window the tool has: a label, the percent used, and when it resets.
 3. Print them in the same shape as the existing tools: a bar, the percent, when the next point lands, and when it resets, plus how old the reading is.
 4. Say clearly when it can't find anything, and why, instead of printing zeros.
@@ -103,13 +103,13 @@ Some tools can't be supported. If a tool doesn't keep its limits on your machine
 
 ## For maintainers: releasing
 
-- Bump `version` in `plugins/token-bar/.claude-plugin/plugin.json` (and the Codex plugin's file for Codex changes). Claude Code updates plugins by version, so without a bump, installed copies won't update.
+- Bump `version` in `plugins/token-next/.claude-plugin/plugin.json` (and the Codex plugin's file for Codex changes). Claude Code updates plugins by version, so without a bump, installed copies won't update.
 - Open a pull request from `development` to `main`, and merge it once the tests pass.
 - Create a GitHub release tagged with the version, with notes that say what changed and how to update:
 
   ```
-  /plugin marketplace update token-bar
-  /plugin update token-bar@token-bar
+  /plugin marketplace update token-next
+  /plugin update token-next@token-next
   ```
 
 ## Be kind

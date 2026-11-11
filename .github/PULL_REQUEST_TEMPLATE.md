@@ -4,7 +4,7 @@
 
 ## How you checked it
 
-- [ ] The tests pass: `cd plugins/token-bar && python3 -m unittest discover -s tests` (and the Codex tests, if you touched them)
+- [ ] The tests pass: `cd plugins/token-next && python3 -m unittest discover -s tests` (and the Codex tests, if you touched them)
 - [ ] `ruff check plugins` is clean
 - [ ] New or changed behavior has a test
 - [ ] It makes no network calls and reads nothing it didn't before (see CONTRIBUTING.md)
